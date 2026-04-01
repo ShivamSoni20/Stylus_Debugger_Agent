@@ -15,9 +15,12 @@
 
 import { readFileSync, existsSync } from "fs";
 import { resolve, basename } from "path";
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 
-const client = new Anthropic();
+const client = new OpenAI({
+  baseURL: "https://api.aimlapi.com/v1",
+  apiKey: process.env.AIML_API_KEY,
+});
 
 const SYSTEM_PROMPT = `
 You are the Stylus Debugger Agent — an expert AI auditor for Arbitrum Stylus smart contracts 
@@ -44,11 +47,11 @@ async function auditContract(filePath: string) {
   console.log(`\n🔍 Auditing: ${filename} (${code.length} chars)\n`);
   console.log("⏳ Running AI audit...\n");
 
-  const message = await client.messages.create({
+  const completion = await client.chat.completions.create({
     model: "claude-opus-4-5",
     max_tokens: 4096,
-    system: SYSTEM_PROMPT,
     messages: [
+      { role: "system", content: SYSTEM_PROMPT },
       {
         role: "user",
         content: `Please audit this Arbitrum Stylus Rust smart contract:\n\n**Filename:** ${filename}\n\n\`\`\`rust\n${code}\n\`\`\`\n\nProvide a full security audit covering vulnerabilities, gas optimizations, Stylus SDK correctness, and deployment readiness.`,
@@ -56,13 +59,12 @@ async function auditContract(filePath: string) {
     ],
   });
 
-  const result = message.content
-    .filter((b) => b.type === "text")
-    .map((b) => b.text)
-    .join("\n");
+  const result = completion.choices[0]?.message?.content || "";
 
   console.log(result);
-  console.log(`\n📊 Tokens used: ${message.usage.input_tokens} in / ${message.usage.output_tokens} out`);
+  if (completion.usage) {
+    console.log(`\n📊 Tokens used: ${completion.usage.prompt_tokens} in / ${completion.usage.completion_tokens} out`);
+  }
 }
 
 async function debugError(filePath: string) {
@@ -76,11 +78,11 @@ async function debugError(filePath: string) {
   console.log(`\n🐛 Debugging error output from: ${basename(absPath)}\n`);
   console.log("⏳ Analyzing error...\n");
 
-  const message = await client.messages.create({
+  const completion = await client.chat.completions.create({
     model: "claude-opus-4-5",
     max_tokens: 2048,
-    system: SYSTEM_PROMPT,
     messages: [
+      { role: "system", content: SYSTEM_PROMPT },
       {
         role: "user",
         content: `A developer is getting this error when building their Arbitrum Stylus contract:\n\n\`\`\`\n${errorOutput}\n\`\`\`\n\nExplain the error in plain English, identify the root cause, and provide a concrete fix.`,
@@ -88,10 +90,7 @@ async function debugError(filePath: string) {
     ],
   });
 
-  const result = message.content
-    .filter((b) => b.type === "text")
-    .map((b) => b.text)
-    .join("\n");
+  const result = completion.choices[0]?.message?.content || "";
 
   console.log(result);
 }
@@ -109,11 +108,11 @@ async function gasReview(filePath: string) {
   console.log(`\n⛽ Gas review: ${filename}\n`);
   console.log("⏳ Analyzing gas patterns...\n");
 
-  const message = await client.messages.create({
+  const completion = await client.chat.completions.create({
     model: "claude-opus-4-5",
     max_tokens: 2048,
-    system: SYSTEM_PROMPT,
     messages: [
+      { role: "system", content: SYSTEM_PROMPT },
       {
         role: "user",
         content: `Review this Arbitrum Stylus Rust contract for gas optimization opportunities. Focus on Stylus/WASM-specific patterns.\n\n\`\`\`rust\n${code}\n\`\`\``,
@@ -121,10 +120,7 @@ async function gasReview(filePath: string) {
     ],
   });
 
-  const result = message.content
-    .filter((b) => b.type === "text")
-    .map((b) => b.text)
-    .join("\n");
+  const result = completion.choices[0]?.message?.content || "";
 
   console.log(result);
 }

@@ -1,4 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 import express from "express";
 import { readFileSync } from "fs";
 import { resolve } from "path";
@@ -6,7 +6,10 @@ import { resolve } from "path";
 const app = express();
 app.use(express.json({ limit: "500kb" }));
 
-const client = new Anthropic();
+const client = new OpenAI({
+  baseURL: "https://api.aimlapi.com/v1",
+  apiKey: process.env.AIML_API_KEY,
+});
 
 // Load skill context from SKILL.md at startup
 const skillContext = readFileSync(resolve("SKILL.md"), "utf-8");
@@ -67,25 +70,23 @@ Be specific — reference actual line patterns, function names, and macro usage 
 `.trim();
 
   try {
-    const message = await client.messages.create({
+    const completion = await client.chat.completions.create({
       model: "claude-opus-4-5",
       max_tokens: 4096,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: "user", content: userPrompt }],
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: userPrompt },
+      ],
     });
 
-    const auditText =
-      message.content
-        .filter((b) => b.type === "text")
-        .map((b) => b.text)
-        .join("\n") || "";
+    const auditText = completion.choices[0]?.message?.content || "";
 
     return res.json({
       success: true,
       filename,
       audit: auditText,
-      usage: message.usage,
-      model: message.model,
+      usage: completion.usage,
+      model: completion.model,
     });
   } catch (err) {
     console.error("Audit error:", err);
@@ -122,24 +123,22 @@ Please:
 `.trim();
 
   try {
-    const message = await client.messages.create({
+    const completion = await client.chat.completions.create({
       model: "claude-opus-4-5",
       max_tokens: 2048,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: "user", content: userPrompt }],
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: userPrompt },
+      ],
     });
 
-    const explanation =
-      message.content
-        .filter((b) => b.type === "text")
-        .map((b) => b.text)
-        .join("\n") || "";
+    const explanation = completion.choices[0]?.message?.content || "";
 
     return res.json({
       success: true,
       filename,
       explanation,
-      usage: message.usage,
+      usage: completion.usage,
     });
   } catch (err) {
     console.error("Debug error:", err);
@@ -172,20 +171,18 @@ For each optimization:
 `.trim();
 
   try {
-    const message = await client.messages.create({
+    const completion = await client.chat.completions.create({
       model: "claude-opus-4-5",
       max_tokens: 2048,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: "user", content: userPrompt }],
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: userPrompt },
+      ],
     });
 
-    const review =
-      message.content
-        .filter((b) => b.type === "text")
-        .map((b) => b.text)
-        .join("\n") || "";
+    const review = completion.choices[0]?.message?.content || "";
 
-    return res.json({ success: true, filename, gasReview: review, usage: message.usage });
+    return res.json({ success: true, filename, gasReview: review, usage: completion.usage });
   } catch (err) {
     console.error("Gas review error:", err);
     return res.status(500).json({ error: "Gas review failed", details: String(err) });

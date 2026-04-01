@@ -37,7 +37,7 @@ npm install
 
 ```bash
 cp .env.example .env
-# Edit .env — add your ANTHROPIC_API_KEY at minimum
+# Edit .env — add your AIML_API_KEY at minimum
 ```
 
 ### 3. Run the demo audit
@@ -197,7 +197,7 @@ stylus-debugger-agent/
 ## Requirements
 
 - Node.js 18+
-- `ANTHROPIC_API_KEY` in `.env`
+- `AIML_API_KEY` in `.env`
 - Funded wallet for agent registration (Arbitrum Sepolia ETH)
 
 ---

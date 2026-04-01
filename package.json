@@ -16,8 +16,8 @@
   "author": "ArbiLink Hackathon Submission",
   "license": "MIT",
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.24.3",
     "express": "^4.19.2",
+    "openai": "^6.33.0",
     "viem": "^2.17.0"
   },
   "devDependencies": {
