@@ -1,3 +1,4 @@
+import "dotenv/config";
 import OpenAI from "openai";
 import express from "express";
 import { readFileSync } from "fs";
@@ -5,6 +6,7 @@ import { resolve } from "path";
 
 const app = express();
 app.use(express.json({ limit: "500kb" }));
+app.use(express.static(resolve("public")));
 
 const client = new OpenAI({
   baseURL: "https://api.aimlapi.com/v1",
@@ -74,7 +76,13 @@ Be specific — reference actual line patterns, function names, and macro usage 
       model: "claude-opus-4-5",
       max_tokens: 4096,
       messages: [
-        { role: "system", content: SYSTEM_PROMPT },
+        {
+          role: "system",
+          content: `You are an elite Arbitrum Stylus Auditor. Your core skill is translating complex Rust/WASM execution paradigms for EVM-native developers.
+1. FOCUS ON STYLUS SPECIFICS: Address WASM compilation steps, memory cost differences relative to standard EVM operations, and cross-VM interoperability constraints.
+2. MAKE IT UNDERSTANDABLE: Break down complex logic architectures. Use simple analogies. 
+3. FORMAT: Output brutalist summary blocks (ALL CAPS LABELS) focused on Actionable vulnerabilities. Start with a "CONTRACT ARCHITECTURE" block explaining what the code is attempting to do in simple terms before auditing security.`
+        },
         { role: "user", content: userPrompt },
       ],
     });
@@ -127,7 +135,14 @@ Please:
       model: "claude-opus-4-5",
       max_tokens: 2048,
       messages: [
-        { role: "system", content: SYSTEM_PROMPT },
+        {
+          role: "system",
+          content: `You are a specialized Error Decoder for Arbitrum Stylus (cargo-stylus).
+Your objective: Demystify Rust build errors and WASM target execution faults.
+1. Explain WHY the compiler failed in simple terms (e.g., Borrow checker violation, unsupported standard library feature, crate incompatibility with WASM).
+2. Detail the specific structural fix.
+FORMAT: Give a direct, step-by-step diagnostic output in brief, stark statements.`
+        },
         { role: "user", content: userPrompt },
       ],
     });

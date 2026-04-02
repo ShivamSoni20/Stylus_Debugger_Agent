@@ -15,6 +15,7 @@
 
 import { readFileSync, existsSync } from "fs";
 import { resolve, basename } from "path";
+import "dotenv/config";
 import OpenAI from "openai";
 
 const client = new OpenAI({

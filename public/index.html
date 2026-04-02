@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Editorial Debugger — Vanguard Auditor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=IBM+Plex+Mono:wght@300;400;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #030303;
+    --surface: #0a0a0a;
+    --border: #222222;
+    --border-hl: #444444;
+    --red: #FF3B00;
+    --text: #F4F4F4;
+    --text-dim: #888888;
+    --font-serif: 'Cormorant Garamond', serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+
+  /* ── STRICT BRUTALISM ── */
+  * { 
+    margin: 0; padding: 0; 
+    box-sizing: border-box; 
+    border-radius: 0 !important; /* Absolute geometric rigidity */
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-mono);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Structural Drafting Grid */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: -1;
+    background-image: 
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-position: center top;
+    mask-image: radial-gradient(circle at 50% 0%, rgba(0,0,0,1) 10%, transparent 80%);
+    -webkit-mask-image: radial-gradient(circle at 50% 0%, rgba(0,0,0,1) 10%, transparent 80%);
+  }
+
+  /* ── KINETIC TYPOGRAPHY & ANIMATION ── */
+  .hard-reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: brutalReveal 0.8s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+  }
+  @keyframes brutalReveal {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .d-1 { animation-delay: 0.1s; }
+  .d-2 { animation-delay: 0.2s; }
+  .d-3 { animation-delay: 0.3s; }
+
+  /* ── NAVIGATION ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; height: 60px;
+    background: rgba(3, 3, 3, 0.95);
+    border-bottom: 1px solid var(--border-hl);
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0 2rem; z-index: 100;
+  }
+  .nav-logo {
+    font-family: var(--font-serif);
+    font-size: 1.5rem; font-style: italic; color: var(--text); text-decoration: none;
+    letter-spacing: 0.05em; display: flex; align-items: baseline; gap: 12px;
+  }
+  .nav-badge {
+    font-family: var(--font-mono); font-size: 0.65rem; font-style: normal;
+    background: var(--red); color: var(--bg); padding: 1px 6px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* ── HARSH INTERACTIVE COMPONENTS ── */
+  button {
+    font-family: var(--font-mono);
+    text-transform: uppercase; letter-spacing: 0.05em;
+    font-size: 0.8rem; font-weight: 600;
+    cursor: pointer; padding: 10px 24px; transition: all 0s;
+  }
+  .btn-raw { background: transparent; color: var(--text); border: 1px solid var(--border-hl); }
+  .btn-raw:hover { background: var(--text); color: var(--bg); }
+  .btn-magma { background: var(--red); color: var(--bg); border: 1px solid var(--red); }
+  .btn-magma:hover { background: transparent; color: var(--red); }
+
+  /* ── WORKSPACE ACTIONS ── */
+  .btn-action { background: transparent; color: var(--text-dim); border: 1px solid var(--border-hl); font-size: 0.70rem; padding: 6px 16px; }
+  .btn-action:hover { background: var(--surface); color: var(--text); border-color: var(--text-dim); }
+  
+  .btn-execute { background: var(--text); color: var(--bg); border: 1px solid var(--text); font-size: 0.70rem; padding: 6px 16px; }
+  .btn-execute:hover { background: transparent; color: var(--text); }
+  .btn-gas { background: var(--border-hl); color: var(--text); border: 1px solid var(--text-dim); font-size: 0.70rem; padding: 6px 16px; }
+  .btn-gas:hover { background: transparent; color: var(--text); border-color: var(--text); }
+
+  /* ── PAGE TOPOLOGY ── */
+  .page { display: none; padding-top: 60px; min-height: 100vh; }
+  .page.active { display: block; }
+  
+  /* ── HERO SECTION ── */
+  .hero {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+    min-height: calc(100vh - 60px); padding: 0 10%; border-bottom: 1px solid var(--border);
+  }
+  .hero-tag {
+    font-size: 0.75rem; color: var(--red); text-transform: uppercase; letter-spacing: 0.2em;
+    border: 1px solid var(--red); padding: 4px 12px; margin-bottom: 2rem;
+  }
+  .hero h1 {
+    font-family: var(--font-serif); font-size: clamp(3rem, 8vw, 7rem); font-weight: 300; 
+    line-height: 1.05; letter-spacing: -0.02em; margin-bottom: 2rem;
+  }
+  .hero h1 em { color: var(--red); font-style: italic; }
+  .hero-mono {
+    font-size: 0.95rem; color: var(--text-dim); max-width: 550px; line-height: 1.6; margin-bottom: 3rem;
+  }
+  .hero-actions { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+  
+  .stats-strip {
+    display: flex; justify-content: center; align-items: center; gap: 4rem; margin-top: 5rem; padding-top: 3rem; border-top: 1px solid var(--border-hl); width: 100%;
+  }
+  .stat { display: flex; flex-direction: column; align-items: center; }
+  .stat-val { font-family: var(--font-serif); font-size: 3rem; line-height: 1; color: var(--text); }
+  .stat-lbl { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; margin-top: 0.5rem; letter-spacing: 0.15em; }
+
+  /* ── DASHBOARD ARCHITECTURE ── */
+  .page.dashboard {
+    display: none; flex-direction: column; height: 100vh; overflow: hidden;
+  }
+  .page.dashboard.active { display: flex; }
+  .dash-layout {
+    display: flex; flex: 1; height: calc(100vh - 60px); width: 100%;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 280px; flex-shrink: 0; background: var(--bg); border-right: 1px solid var(--border-hl);
+    display: flex; flex-direction: column; 
+  }
+  .sb-header { padding: 1.5rem; font-size: 0.75rem; color: var(--text-dim); border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.1em;}
+  .sb-item {
+    padding: 1.25rem 1.5rem; color: var(--text-dim); font-size: 0.85rem; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border); border-right: 3px solid transparent; transition: 0s;
+  }
+  .sb-item:hover { background: var(--surface); color: var(--text); }
+  .sb-item.active { background: var(--bg); color: var(--red); border-right-color: var(--red); }
+  .sb-footer { margin-top: auto; padding: 1.5rem; border-top: 1px solid var(--border); font-size: 0.75rem; color: var(--text-dim); }
+
+  /* Main Area */
+  .dash-main { flex: 1; display: flex; flex-direction: column; background: var(--bg); position: relative; }
+  .dash-header {
+    padding: 1.5rem 2rem; border-bottom: 1px solid var(--border-hl); display: flex; justify-content: space-between; align-items: center; background: var(--bg);
+  }
+  .dash-title { font-family: var(--font-serif); font-size: 2.25rem; font-weight: 300; letter-spacing: -0.01em; }
+  .dash-subtitle { font-size: 0.75rem; color: var(--text-dim); margin-top: 0.5rem; text-transform: uppercase; letter-spacing: 0.1em; }
+
+  .audit-workspace {
+    display: flex; flex: 1; min-height: 0; flex-direction: column;
+  }
+  
+  /* ── SUBSYSTEM VIEWS ── */
+  .sub-view { display: none; flex: 1; min-height: 0; }
+  
+  /* Security Audit (Vertical Split) */
+  .sub-view.active.view-audit { display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
+
+  /* Scan History Ledger */
+  .sub-view.active.view-history { display: flex; flex-direction: column; background: var(--bg); }
+  .hist-list { display: flex; flex-direction: column; gap: 1.5rem; }
+  .hist-card { border: 1px solid var(--border-hl); background: var(--bg); display: flex; flex-direction: column; transition: 0s; }
+  .hist-card:hover { border-color: var(--text-dim); }
+  .hist-meta { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1.5rem; background: var(--surface); border-bottom: 1px solid var(--border); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); }
+  .hist-time { font-family: var(--font-serif); font-size: 1.25rem; font-style: italic; color: var(--text); text-transform: none; letter-spacing: 0; }
+  .hist-body { padding: 1.5rem; }
+  .hist-code { font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.5; color: var(--text-dim); background: rgba(255,255,255,0.02); padding: 1rem; border: 1px solid var(--border); white-space: pre-wrap; word-break: break-all; }
+  .hist-sys { border-left: 2px solid var(--red); padding-left: 8px; }
+  .hist-stat.ok { color: var(--text); }
+  .hist-stat.err { color: var(--red); }
+  
+  /* Gas Telemetry (Horizontal Split) */
+  .sub-view.active.view-gas { display: flex; flex-direction: column; width: 100%; }
+  .gas-editor-pane { height: 40%; border-bottom: 1px solid var(--border-hl); display: flex; flex-direction: column; flex-shrink: 0; }
+  .gas-metrics-pane { flex: 1; display: grid; grid-template-columns: 1fr 1fr; background: var(--surface); overflow-y: auto; }
+  .gas-metric-card { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 1.5rem; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+  .gas-metric-card.wide { grid-column: span 2; border-right: none; }
+  .metric-val { font-family: var(--font-serif); font-size: 3rem; color: var(--text); line-height: 1; margin-bottom: 0.5rem; }
+  .metric-lbl { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.1em; }
+
+  .editor-pane {
+    border-right: 1px solid var(--border-hl); display: flex; flex-direction: column; background: var(--bg); height: 100%;
+  }
+  .pane-head {
+    padding: 0.75rem 1.5rem; border-bottom: 1px solid var(--border); background: var(--surface); color: var(--text-dim); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.15em; display: flex; justify-content: space-between; align-items: center; min-height: 50px;
+  }
+  textarea.code-editor {
+    flex: 1; background: transparent; color: #CCCCCC; border: none; outline: none; padding: 1.5rem; font-family: var(--font-mono); font-size: 0.85rem; line-height: 1.6; resize: none; width: 100%;
+  }
+  .results-pane { display: flex; flex-direction: column; overflow-y: auto; background: var(--surface); }
+  .res-content { padding: 1.5rem; flex: 1; }
+
+  /* Structured Brutalist Cards */
+  .audit-card {
+    border: 1px solid var(--border); background: var(--bg); padding: 1.5rem; margin-bottom: 1rem;
+    position: relative; transition: 0s;
+  }
+  .audit-card:hover { border-color: var(--text-dim); }
+  .audit-card.critical { border-left: 4px solid var(--red); }
+  .audit-card.gas { border-left: 4px solid var(--text); }
+  
+  .empty-state { text-align: left; color: var(--text-dim); margin-top: 4rem; }
+  .empty-state .icon { font-family: var(--font-serif); font-size: 4rem; font-style: italic; color: var(--border-hl); margin-bottom: 1rem; display: block; }
+
+  /* ── MOBILE RESPONSIVENESS ── */
+  @media (max-width: 900px) {
+    .dash-layout { flex-direction: column; overflow-y: visible; height: auto; min-height: calc(100vh - 60px); }
+    .page.dashboard { overflow: visible !important; height: auto !important; min-height: 100vh; }
+    .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border-hl); flex-direction: row; position: sticky; top: 60px; z-index: 10; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .sb-header, .sb-footer { display: none; }
+    .sb-item { border-bottom: none; border-right: none; border-bottom: 2px solid transparent; padding: 1rem; white-space: nowrap; }
+    .sb-item.active { border-right: none; border-bottom-color: var(--red); }
+    .audit-workspace { grid-template-columns: 1fr; }
+    .editor-pane { border-right: none; border-bottom: 1px solid var(--border-hl); height: 50vh; }
+    .dash-header { flex-direction: column; align-items: flex-start; gap: 1rem; padding: 1.25rem; }
+    .stats-strip { flex-direction: column; gap: 2rem; }
+    .hero { padding: 4rem 2rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#" class="nav-logo" onclick="showPage('landing'); return false;">
+    Stylus <em>Auditor</em> <span class="nav-badge">V1.0</span>
+  </a>
+  <div class="nav-right" style="display: flex; gap: 12px;">
+    <button class="btn-raw" onclick="window.open('https://github.com','_blank')">Docs</button>
+    <button class="btn-magma" onclick="showPage('dashboard')">Engage System</button>
+  </div>
+</nav>
+
+<!-- LANDING PAGE -->
+<div id="page-landing" class="page active landing">
+  <section class="hero">
+    <div class="hero-tag hard-reveal">ArbiLink Security Protocol</div>
+    <h1 class="hard-reveal d-1">
+      The Vanguard of<br/><em>Execution.</em>
+    </h1>
+    <p class="hero-mono hard-reveal d-2">
+      Abandon passive oversight. Embrace absolute structural certainty. 
+      Professional-grade static analysis and vulnerability detection for Arbitrum Stylus Rust contracts. Uncompromising AI intelligence.
+    </p>
+    <div class="hero-actions hard-reveal d-3">
+      <button class="btn-magma" onclick="showPage('dashboard')">Initialize Auditor</button>
+      <button class="btn-raw" onclick="window.open('https://github.com','_blank')">System Architecture</button>
+    </div>
+
+    <div class="stats-strip hard-reveal d-3">
+      <div class="stat">
+        <div class="stat-val">5D</div>
+        <div class="stat-lbl">Analysis Vectors</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val">&lt;30s</div>
+        <div class="stat-lbl">Processing Time</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val">WASM</div>
+        <div class="stat-lbl">Compilation Target</div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- DASHBOARD PAGE -->
+<div id="page-dashboard" class="page dashboard">
+  <div class="dash-layout">
+    <aside class="sidebar">
+      <div class="sb-header">Subsystems</div>
+      <div class="sb-item active" onclick="switchTab('audit', this)">+ Security Audit</div>
+      <div class="sb-item" onclick="switchTab('history', this)">+ Scan History</div>
+      <div class="sb-item" onclick="switchTab('gas', this)">+ Gas Telemetry</div>
+      <div class="sb-footer">Status: ONLINE</div>
+    </aside>
+
+    <div class="dash-main">
+      <div class="dash-header">
+        <div>
+          <div class="dash-title">Security Audit</div>
+          <div class="dash-subtitle">Analyze Stylus Rust syntax for structural vulnerabilities</div>
+        </div>
+      </div>
+      
+      <div class="audit-workspace">
+        
+        <!-- ======================= -->
+        <!-- VIEW: SECURITY AUDIT    -->
+        <!-- ======================= -->
+        <div id="view-audit" class="sub-view view-audit active">
+          <!-- Editor -->
+          <div class="editor-pane">
+            <div class="pane-head">
+              <div style="display: flex; gap: 12px;">
+                <span>contract_source.rs</span>
+                <span style="opacity: 0.5;">UTF-8 // RUST</span>
+              </div>
+              <div style="display: flex; gap: 12px;">
+                <button class="btn-action" onclick="document.getElementById('code-input-audit').value = ''">Purge</button>
+                <button class="btn-execute" onclick="runAudit()">Execute Audit -></button>
+              </div>
+            </div>
+            <textarea class="code-editor" id="code-input-audit" spellcheck="false" placeholder="// Insert Arbitrum Stylus Rust code here..."></textarea>
+          </div>
+
+          <!-- Results -->
+          <div class="results-pane">
+            <div class="pane-head">
+              <span>Terminal Output</span>
+              <span id="scan-status-audit" style="color: var(--text-dim);">[ STANDBY ]</span>
+            </div>
+            <div id="result-panel-audit" class="res-content">
+              <div class="empty-state hard-reveal">
+                <span class="icon">A</span>
+                <div style="font-size: 1.25rem; font-family: var(--font-serif); margin-bottom: 8px; color: var(--text);">Awaiting Protocol Input</div>
+                <div style="font-size: 0.8rem;">System is idle. Awaiting user injection.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ======================= -->
+        <!-- VIEW: SCAN HISTORY      -->
+        <!-- ======================= -->
+        <div id="view-history" class="sub-view view-history">
+          <div class="pane-head" style="min-height: 50px;">
+            <div style="font-family: var(--font-serif); font-size: 1.25rem; font-style: italic; color: var(--text); text-transform: none; letter-spacing: 0;">Local Execution Ledger</div>
+            <button class="btn-action" onclick="localStorage.removeItem('stylus_history'); renderHistory();">Purge Ledger</button>
+          </div>
+          <div id="history-list" class="hist-list" style="padding: 2rem; overflow-y: auto; flex: 1;">
+             <!-- Injected via renderHistory() -->
+          </div>
+        </div>
+
+        <!-- ======================= -->
+        <!-- VIEW: GAS TELEMETRY     -->
+        <!-- ======================= -->
+        <div id="view-gas" class="sub-view view-gas">
+          <!-- Editor Top Half -->
+          <div class="gas-editor-pane">
+            <div class="pane-head">
+              <div style="display: flex; gap: 12px;">
+                <span>gas_target.rs</span>
+                <span style="opacity: 0.5;">WASM BYTECODE ANALYSIS</span>
+              </div>
+              <div style="display: flex; gap: 12px;">
+                <button class="btn-action" onclick="document.getElementById('code-input-gas').value = ''">Wipe Metrics</button>
+                <button class="btn-gas" onclick="runGas()">Measure Telemetry -></button>
+              </div>
+            </div>
+            <textarea class="code-editor" id="code-input-gas" spellcheck="false" placeholder="// Insert Arbitrum Stylus Rust code for Gas Analysis here..."></textarea>
+          </div>
+
+          <!-- Metrics Bottom Grid -->
+          <div class="gas-metrics-pane" id="result-panel-gas">
+             <div class="empty-state hard-reveal" style="grid-column: span 2; margin: auto;">
+                <span class="icon" style="font-style: normal; font-family: var(--font-mono); letter-spacing: -2px;">&lt;/&gt;</span>
+                <div style="font-size: 1.25rem; font-family: var(--font-serif); margin-bottom: 8px; color: var(--text);">Compile to WASM</div>
+                <div style="font-size: 0.8rem;">Inject logic to measure allocation and computational weight.</div>
+              </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + id).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  function switchTab(tab, sidebarEl) {
+    document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+    if (sidebarEl) sidebarEl.classList.add('active');
+    
+    document.querySelectorAll('.sub-view').forEach(v => v.classList.remove('active'));
+    const activeView = document.getElementById('view-' + tab);
+    if(activeView) activeView.classList.add('active');
+
+    const titles = {
+      audit: ['Security Audit', 'Analyze Stylus Rust syntax for structural vulnerabilities'],
+      history: ['Scan History', ''],
+      gas: ['Gas Telemetry', 'WASM-specific allocation and gas optimization vectors'],
+    };
+    document.querySelector('.dash-title').textContent = titles[tab][0];
+    document.querySelector('.dash-subtitle').textContent = titles[tab][1];
+  }
+
+  function purgeActiveEditor() {
+    const activeView = document.querySelector('.sub-view.active');
+    if(!activeView) return;
+    const tabId = activeView.id.replace('view-', '');
+    const ed = document.getElementById('code-input-' + tabId);
+    if(ed) ed.value = '';
+  }
+
+  function executeActiveScan() {
+    const activeView = document.querySelector('.sub-view.active');
+    if(!activeView) return;
+    const tabId = activeView.id.replace('view-', '');
+    if(tabId === 'audit') runAudit();
+    else if(tabId === 'gas') runGas();
+    else alert('[SYS] No active execution context available for this subsystem.');
+  }
+
+  function saveToHistory(subsystem, status, code) {
+    let history = [];
+    try { history = JSON.parse(localStorage.getItem('stylus_history') || '[]'); } catch(e){}
+    const timestamp = new Date().toLocaleTimeString();
+    const hash = '0x' + Math.random().toString(16).substr(2, 8).toUpperCase() + '...';
+    const snippet = code.trim().substring(0, 45).replace(/\n/g, ' ') + '...';
+    history.unshift({ timestamp, subsystem, status, hash, code, snippet });
+    if(history.length > 50) history.pop();
+    localStorage.setItem('stylus_history', JSON.stringify(history));
+    renderHistory();
+  }
+
+  function renderHistory() {
+    const list = document.getElementById('history-list');
+    if(!list) return;
+    let history = [];
+    try { history = JSON.parse(localStorage.getItem('stylus_history') || '[]'); } catch(e){}
+    
+    if(history.length === 0) {
+      list.innerHTML = '<div class="empty-state" style="margin-top: 2rem;"><span class="icon" style="font-size:3rem; color:var(--border-hl)">Ø</span><div style="font-family: var(--font-serif); font-size: 1.5rem; color: var(--text);">Ledger is Empty</div><div style="font-size: 0.8rem;">No executed scans logged.</div></div>';
+      return;
+    }
+    
+    list.innerHTML = history.map((h, i) => {
+      const isOk = h.status === 'OK';
+      const codeArr = (h.code || '').split('\\n');
+      const codePreview = codeArr.slice(0, 4).join('\\n') + (codeArr.length > 4 ? '\\n// ...' : '');
+      return `
+      <div class="hist-card hard-reveal" style="animation-delay: ${window.hasLoadedHist ? '0s' : (i * 0.05) + 's'};">
+        <div class="hist-meta">
+          <div style="display: flex; align-items: center; gap: 1.5rem;">
+            <div class="hist-time">${h.timestamp}</div>
+            <div class="hist-sys">${h.subsystem}</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 1.5rem;">
+            <div class="hist-stat ${isOk ? 'ok' : 'err'}">[ ${h.status} ]</div>
+            <button class="btn-action" style="padding: 4px 10px; font-size: 0.65rem;" onclick="loadFromHistory(${i})">Load =></button>
+          </div>
+        </div>
+        <div class="hist-body">
+          <div class="hist-code">${codePreview.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>
+        </div>
+      </div>
+    `}).join('');
+    window.hasLoadedHist = true;
+  }
+  
+  function loadFromHistory(index) {
+    let history = [];
+    try { history = JSON.parse(localStorage.getItem('stylus_history') || '[]'); } catch(e){}
+    const item = history[index];
+    if(item && item.code) {
+      if(item.subsystem === 'Gas Telemetry') {
+         document.getElementById('code-input-gas').value = item.code;
+         // Trigger DOM click to swap visual states
+         document.querySelectorAll('.sb-item')[2].click();
+      } else {
+         document.getElementById('code-input-audit').value = item.code;
+         document.querySelectorAll('.sb-item')[0].click();
+      }
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', renderHistory);
+
+  async function runAudit() {
+    const code = document.getElementById('code-input-audit').value.trim();
+    if (!code) return alert('ERR: No protocol payload found.');
+
+    const resultPanel = document.getElementById('result-panel-audit');
+    const statusLabel = document.getElementById('scan-status-audit');
+    
+    resultPanel.innerHTML = '<div style="color: var(--text-dim); padding: 1rem;">[SYS] INITIALIZING NEURAL SCAN...</div>';
+    statusLabel.textContent = '[ SCANNING ]';
+    statusLabel.style.color = 'var(--text)';
+
+    try {
+      const res = await fetch('/audit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contractCode: code }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        saveToHistory('Security Audit', 'OK', code);
+        const sections = data.audit.split(/\n(?=[A-Z0-9])/);
+        resultPanel.innerHTML = sections.map(s => {
+            const isCrit = s.toLowerCase().includes('critical') || s.toLowerCase().includes('vulnerability');
+            return `<div class="audit-card hard-reveal ${isCrit ? 'critical' : 'gas'}">
+              <div style="font-size: 0.85rem; color: var(--text); line-height: 1.6; white-space: pre-wrap;">${s}</div>
+            </div>`;
+        }).join('');
+        statusLabel.textContent = '[ OK ]';
+        statusLabel.style.color = 'var(--text)';
+      } else {
+        saveToHistory('Security Audit', 'ERR', code);
+        resultPanel.innerHTML = `<div class="audit-card critical">${data.details || 'FAILURE'}</div>`;
+        statusLabel.textContent = '[ ERR ]';
+        statusLabel.style.color = 'var(--red)';
+      }
+    } catch (err) {
+      saveToHistory('Security Audit', 'DISCONNECT', code);
+      resultPanel.innerHTML = `<div class="audit-card critical">CONNECTION SEVERED.</div>`;
+      statusLabel.textContent = '[ ERR ]';
+      statusLabel.style.color = 'var(--red)';
+    }
+  }
+
+  async function runGas() {
+    const code = document.getElementById('code-input-gas').value.trim();
+    if (!code) return alert('ERR: No protocol payload found.');
+
+    const resultPanel = document.getElementById('result-panel-gas');
+    resultPanel.innerHTML = '<div style="color:var(--text-dim); padding:1rem; grid-column:span 2;text-align:center;">[SYS] MEASURING ALLOCATIONS...</div>';
+    
+    try {
+      const res = await fetch('/gas-review', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contractCode: code }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        saveToHistory('Gas Telemetry', 'OK', code);
+        const metrics = data.audit.split(/\n\s*\n|\n(?=-|\*)/).filter(m => m.trim().length > 5);
+        resultPanel.innerHTML = metrics.map((m, i) => {
+          let content = m.replace(/\*/g, '').trim();
+          let parts = content.split(':');
+          let title = parts[0] ? parts[0] : 'METRIC';
+          let val = parts.slice(1).join(':') || content;
+          return `<div class="gas-metric-card hard-reveal ${i === 0 ? 'wide' : ''}">
+             <div class="metric-val" style="font-size: ${val.length > 50 ? '1rem' : '2rem'}; word-break:break-word; max-height:100px; overflow-y:auto;text-align:left;">${val.trim()}</div>
+             <div class="metric-lbl">${title.trim()}</div>
+          </div>`;
+        }).join('');
+      } else {
+        saveToHistory('Gas Telemetry', 'ERR', code);
+        resultPanel.innerHTML = `<div class="gas-metric-card wide" style="border-left:4px solid var(--red);">${data.details || 'FAILURE'}</div>`;
+      }
+    } catch(err) {
+       saveToHistory('Gas Telemetry', 'DISCONNECT', code);
+       resultPanel.innerHTML = `<div class="gas-metric-card wide" style="border-left:4px solid var(--red);">NETWORK ERR</div>`;
+    }
+  }
+</script>
+</body>
+</html>
