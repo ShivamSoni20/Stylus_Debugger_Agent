@@ -80,8 +80,9 @@ Be specific — reference actual line patterns, function names, and macro usage 
           role: "system",
           content: `You are an elite Arbitrum Stylus Auditor. Your core skill is translating complex Rust/WASM execution paradigms for EVM-native developers.
 1. FOCUS ON STYLUS SPECIFICS: Address WASM compilation steps, memory cost differences relative to standard EVM operations, and cross-VM interoperability constraints.
-2. MAKE IT UNDERSTANDABLE: Break down complex logic architectures. Use simple analogies. 
-3. FORMAT: Output brutalist summary blocks (ALL CAPS LABELS) focused on Actionable vulnerabilities. Start with a "CONTRACT ARCHITECTURE" block explaining what the code is attempting to do in simple terms before auditing security.`
+2. MAKE IT UNDERSTANDABLE: Break down logic simply, but DO NOT over-explain.
+3. FORMAT: Output brutalist summary blocks (ALL CAPS LABELS). 
+4. STRICT LENGTH LIMIT: Keep the entire response extremely concise (under 250 words). Do not write extensive checklists or long-winded best practices. ONLY list the Top 2 most critical vulnerabilities. Be brutally direct.`
         },
         { role: "user", content: userPrompt },
       ],
@@ -171,26 +172,21 @@ app.post("/gas-review", async (req, res) => {
   }
 
   const userPrompt = `
-Review this Arbitrum Stylus Rust contract specifically for gas optimization opportunities.
-Focus on Stylus/WASM-specific gas patterns, not generic Solidity patterns.
-
+Review this Arbitrum Stylus Rust contract strictly for WASM/Gas vectors:
 \`\`\`rust
 ${contractCode}
 \`\`\`
-
-For each optimization:
-- Describe the current pattern
-- Explain why it costs extra gas in the Stylus WASM execution model
-- Provide the optimized code
-- Give a rough relative improvement estimate (e.g., "~20% fewer storage reads in this function")
 `.trim();
 
   try {
     const completion = await client.chat.completions.create({
       model: "claude-opus-4-5",
-      max_tokens: 2048,
+      max_tokens: 1024,
       messages: [
-        { role: "system", content: SYSTEM_PROMPT },
+        { 
+          role: "system", 
+          content: "You are an elite Arbitrum Stylus Gas Architect. Output MUST strictly be under 100 words. Focus exclusively on the ONE or TWO biggest WASM-specific optimization vectors. Format strictly as stark metric blocks. Absolutely no conversational filler or long explanations." 
+        },
         { role: "user", content: userPrompt },
       ],
     });

@@ -188,7 +188,10 @@
   
   /* Gas Telemetry (Horizontal Split) */
   .sub-view.active.view-gas { display: flex; flex-direction: column; width: 100%; }
-  .gas-editor-pane { height: 40%; border-bottom: 1px solid var(--border-hl); display: flex; flex-direction: column; flex-shrink: 0; }
+  .gas-editor-pane { height: 40%; display: flex; flex-direction: column; flex-shrink: 0; }
+  .resizer { height: 6px; width: 100%; background: var(--bg); border-top: 1px solid var(--border-hl); border-bottom: 1px solid var(--border-hl); cursor: row-resize; display: flex; align-items: center; justify-content: center; z-index: 10; transition: background 0.1s; }
+  .resizer:hover { background: var(--border-hl); }
+  .resizer-line { width: 30px; height: 1px; background: var(--text-dim); }
   .gas-metrics-pane { flex: 1; display: grid; grid-template-columns: 1fr 1fr; background: var(--surface); overflow-y: auto; }
   .gas-metric-card { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 1.5rem; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
   .gas-metric-card.wide { grid-column: span 2; border-right: none; }
@@ -286,8 +289,8 @@
     <aside class="sidebar">
       <div class="sb-header">Subsystems</div>
       <div class="sb-item active" onclick="switchTab('audit', this)">+ Security Audit</div>
-      <div class="sb-item" onclick="switchTab('history', this)">+ Scan History</div>
       <div class="sb-item" onclick="switchTab('gas', this)">+ Gas Telemetry</div>
+      <div class="sb-item" onclick="switchTab('history', this)">+ Scan History</div>
       <div class="sb-footer">Status: ONLINE</div>
     </aside>
 
@@ -354,7 +357,7 @@
         <!-- ======================= -->
         <div id="view-gas" class="sub-view view-gas">
           <!-- Editor Top Half -->
-          <div class="gas-editor-pane">
+          <div class="gas-editor-pane" id="gas-editor-container">
             <div class="pane-head">
               <div style="display: flex; gap: 12px;">
                 <span>gas_target.rs</span>
@@ -366,6 +369,11 @@
               </div>
             </div>
             <textarea class="code-editor" id="code-input-gas" spellcheck="false" placeholder="// Insert Arbitrum Stylus Rust code for Gas Analysis here..."></textarea>
+          </div>
+
+          <!-- Adjusting Resizer Bar -->
+          <div class="resizer" id="gas-resizer">
+            <div class="resizer-line"></div>
           </div>
 
           <!-- Metrics Bottom Grid -->
@@ -478,8 +486,7 @@
     if(item && item.code) {
       if(item.subsystem === 'Gas Telemetry') {
          document.getElementById('code-input-gas').value = item.code;
-         // Trigger DOM click to swap visual states
-         document.querySelectorAll('.sb-item')[2].click();
+         document.querySelectorAll('.sb-item')[1].click();
       } else {
          document.getElementById('code-input-audit').value = item.code;
          document.querySelectorAll('.sb-item')[0].click();
@@ -487,7 +494,42 @@
     }
   }
 
-  document.addEventListener('DOMContentLoaded', renderHistory);
+  document.addEventListener('DOMContentLoaded', () => {
+    renderHistory();
+
+    // Gas Telemetry Resizer Logic
+    const resizer = document.getElementById('gas-resizer');
+    const topPane = document.getElementById('gas-editor-container');
+    const viewGas = document.getElementById('view-gas');
+    let isResizing = false;
+
+    if (resizer) {
+      resizer.addEventListener('mousedown', function(e) {
+        isResizing = true;
+        document.body.style.cursor = 'row-resize';
+      });
+
+      document.addEventListener('mousemove', function(e) {
+        if (!isResizing) return;
+        const containerRect = viewGas.getBoundingClientRect();
+        // Calculate relative height as a percentage to remain responsive
+        let newHeight = ((e.clientY - containerRect.top) / containerRect.height) * 100;
+        
+        // Strict boundary constraints
+        if (newHeight < 20) newHeight = 20;
+        if (newHeight > 80) newHeight = 80;
+        
+        topPane.style.height = `${newHeight}%`;
+      });
+
+      document.addEventListener('mouseup', function() {
+        if (isResizing) {
+          isResizing = false;
+          document.body.style.cursor = '';
+        }
+      });
+    }
+  });
 
   async function runAudit() {
     const code = document.getElementById('code-input-audit').value.trim();
@@ -548,7 +590,7 @@
       const data = await res.json();
       if (data.success) {
         saveToHistory('Gas Telemetry', 'OK', code);
-        const metrics = data.audit.split(/\n\s*\n|\n(?=-|\*)/).filter(m => m.trim().length > 5);
+        const metrics = (data.gasReview || "").split(/\n\s*\n|\n(?=-|\*)/).filter(m => m.trim().length > 5);
         resultPanel.innerHTML = metrics.map((m, i) => {
           let content = m.replace(/\*/g, '').trim();
           let parts = content.split(':');
