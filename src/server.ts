@@ -17,7 +17,7 @@ app.use((req, res, next) => {
 });
 
 // Serve frontend from public/
-app.use(express.static(path.join(process.cwd(), "public")));
+app.use(express.static(path.join(__dirname, "..", "public")));
 
 const client = new OpenAI({
   baseURL: "https://api.aimlapi.com/v1",
@@ -226,8 +226,8 @@ app.get("/health", (_req, res) => {
 
 // ── Start ─────────────────────────────────────────────────────────────────────
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`StylusAudit running on port ${PORT}`);
   console.log(`  POST /audit       — Full security audit`);
   console.log(`  POST /debug       — Explain cargo-stylus errors`);

@@ -37,7 +37,7 @@ const REGISTRY_ABI = parseAbi([
 
 // ── Agent metadata ─────────────────────────────────────────────────────────────
 const AGENT_METADATA = {
-  name: "StylusAudit",
+  name: "StylusAudit_Vanguard",
   description:
     "AI-powered security auditor for Arbitrum Stylus Rust smart contracts. " +
     "Detects vulnerabilities, gas inefficiencies, and Stylus SDK anti-patterns. " +
@@ -66,7 +66,7 @@ async function registerAgent() {
     process.env.RPC_URL ||
     (isMainnet
       ? "https://arb1.arbitrum.io/rpc"
-      : "https://sepolia-rollup.arbitrum.io/rpc");
+      : "https://endpoints.omniatech.io/v1/arbitrum/sepolia/public");
 
   console.log(`\n🤖 Stylus Debugger Agent — Registration`);
   console.log(`   Network:  ${isMainnet ? "Arbitrum One (mainnet)" : "Arbitrum Sepolia (testnet)"}`);
