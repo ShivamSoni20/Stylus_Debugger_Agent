@@ -37,7 +37,7 @@ const REGISTRY_ABI = parseAbi([
 
 // ── Agent metadata ─────────────────────────────────────────────────────────────
 const AGENT_METADATA = {
-  name: "StylusVanguard_Final",
+  name: "StylusAudit",
   description:
     "AI-powered security auditor for Arbitrum Stylus Rust smart contracts. " +
     "Detects vulnerabilities, gas inefficiencies, and Stylus SDK anti-patterns. " +
