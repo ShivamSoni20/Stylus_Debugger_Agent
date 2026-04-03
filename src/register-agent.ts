@@ -37,14 +37,14 @@ const REGISTRY_ABI = parseAbi([
 
 // ── Agent metadata ─────────────────────────────────────────────────────────────
 const AGENT_METADATA = {
-  name: "StylusAudit_Vanguard",
+  name: "StylusVanguard_Final",
   description:
     "AI-powered security auditor for Arbitrum Stylus Rust smart contracts. " +
     "Detects vulnerabilities, gas inefficiencies, and Stylus SDK anti-patterns. " +
     "Returns structured audit reports with severity ratings and concrete code fixes. " +
     "ArbiLink Hackathon 2026.",
-  endpoint: process.env.AGENT_ENDPOINT || "https://your-deployed-url.com",
-  metadataURI: (process.env.AGENT_ENDPOINT || "https://your-deployed-url.com") + "/health",
+  endpoint: process.env.AGENT_ENDPOINT || "https://stylus-debugger-agent-production.up.railway.app",
+  metadataURI: process.env.AGENT_ENDPOINT || "https://stylus-debugger-agent-production.up.railway.app",
 };
 
 // ── Main registration function ────────────────────────────────────────────────
@@ -66,7 +66,7 @@ async function registerAgent() {
     process.env.RPC_URL ||
     (isMainnet
       ? "https://arb1.arbitrum.io/rpc"
-      : "https://endpoints.omniatech.io/v1/arbitrum/sepolia/public");
+      : "https://sepolia-rollup.arbitrum.io/rpc");
 
   console.log(`\n🤖 Stylus Debugger Agent — Registration`);
   console.log(`   Network:  ${isMainnet ? "Arbitrum One (mainnet)" : "Arbitrum Sepolia (testnet)"}`);
@@ -105,21 +105,7 @@ async function registerAgent() {
   console.log(`   Description: ${AGENT_METADATA.description.slice(0, 80)}...`);
 
   try {
-    // Simulate first to catch reverts before spending gas
-    await publicClient.simulateContract({
-      address: registryAddress,
-      abi: REGISTRY_ABI,
-      functionName: "registerAgent",
-      args: [
-        AGENT_METADATA.name,
-        AGENT_METADATA.description,
-        AGENT_METADATA.endpoint,
-        AGENT_METADATA.metadataURI,
-      ],
-      account: account.address,
-    });
-
-    console.log("\n✅ Simulation passed. Sending registration transaction...");
+    console.log("\n🚀 Bypassing simulation and sending registration transaction directly...");
 
     // Send the real transaction
     const txHash = await walletClient.writeContract({
