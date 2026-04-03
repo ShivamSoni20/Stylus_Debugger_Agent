@@ -2,13 +2,12 @@ import "dotenv/config";
 import OpenAI from "openai";
 import express from "express";
 import { readFileSync } from "fs";
-import { resolve } from "path";
 import path from "path";
 
 const app = express();
 app.use(express.json({ limit: "500kb" }));
 
-// Fix CORS so the UI can call the API
+// Fix CORS so the UI can call the API regardless of Railway domain mapping
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Content-Type");
@@ -17,7 +16,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Serve static frontend
+// Serve frontend from public/
 app.use(express.static(path.join(process.cwd(), "public")));
 
 const client = new OpenAI({
@@ -26,7 +25,7 @@ const client = new OpenAI({
 });
 
 // Load skill context from SKILL.md at startup
-const skillContext = readFileSync(resolve("SKILL.md"), "utf-8");
+const skillContext = readFileSync(path.join(process.cwd(), "SKILL.md"), "utf-8");
 
 const SYSTEM_PROMPT = `
 You are the Stylus Debugger Agent — an expert AI auditor for Arbitrum Stylus smart contracts 
@@ -227,9 +226,9 @@ app.get("/health", (_req, res) => {
 
 // ── Start ─────────────────────────────────────────────────────────────────────
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`StylusAudit running on port ${PORT}`);
+const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Stylus Debugger Agent running on http://0.0.0.0:${PORT}`);
   console.log(`  POST /audit       — Full security audit`);
   console.log(`  POST /debug       — Explain cargo-stylus errors`);
   console.log(`  POST /gas-review  — Gas optimization review`);
