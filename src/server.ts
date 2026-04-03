@@ -3,10 +3,22 @@ import OpenAI from "openai";
 import express from "express";
 import { readFileSync } from "fs";
 import { resolve } from "path";
+import path from "path";
 
 const app = express();
 app.use(express.json({ limit: "500kb" }));
-app.use(express.static(resolve("public")));
+
+// Fix CORS so the UI can call the API
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Content-Type");
+  res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  if (req.method === "OPTIONS") return res.sendStatus(200);
+  next();
+});
+
+// Serve static frontend
+app.use(express.static(path.join(process.cwd(), "public")));
 
 const client = new OpenAI({
   baseURL: "https://api.aimlapi.com/v1",
@@ -215,9 +227,9 @@ app.get("/health", (_req, res) => {
 
 // ── Start ─────────────────────────────────────────────────────────────────────
 
-const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Stylus Debugger Agent running on port ${PORT}`);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`StylusAudit running on port ${PORT}`);
   console.log(`  POST /audit       — Full security audit`);
   console.log(`  POST /debug       — Explain cargo-stylus errors`);
   console.log(`  POST /gas-review  — Gas optimization review`);

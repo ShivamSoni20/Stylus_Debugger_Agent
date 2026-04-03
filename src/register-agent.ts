@@ -9,6 +9,8 @@
  *   PRIVATE_KEY=0x... NETWORK=mainnet npx tsx register-agent.ts
  */
 
+import "dotenv/config";
+
 import {
   createWalletClient,
   createPublicClient,
@@ -35,23 +37,22 @@ const REGISTRY_ABI = parseAbi([
 
 // ── Agent metadata ─────────────────────────────────────────────────────────────
 const AGENT_METADATA = {
-  name: "Stylus Debugger Agent",
+  name: "StylusAudit",
   description:
-    "AI-powered Arbitrum Stylus smart contract auditor. Accepts Rust contract source code and returns plain-English security audit reports, gas optimization suggestions, and deployment readiness checks. Built for ArbiLink Hackathon.",
-  // Replace with your deployed endpoint URL
-  endpoint: process.env.AGENT_ENDPOINT || "https://your-agent-url.com",
-  // IPFS or HTTPS URL to a JSON metadata file (optional but recommended)
-  metadataURI:
-    process.env.AGENT_METADATA_URI ||
-    "https://your-agent-url.com/agent-metadata.json",
+    "AI-powered security auditor for Arbitrum Stylus Rust smart contracts. Detects vulnerabilities, gas inefficiencies, and Stylus SDK anti-patterns. Returns structured audit reports with severity ratings and concrete code fixes. Built for ArbiLink Hackathon 2026.",
+  endpoint: process.env.AGENT_ENDPOINT || "https://your-deployed-url.com",
+  metadataURI: process.env.AGENT_METADATA_URI || "https://your-deployed-url.com/agent-metadata.json",
 };
 
 // ── Main registration function ────────────────────────────────────────────────
 async function registerAgent() {
-  const privateKey = process.env.PRIVATE_KEY as Hex | undefined;
-  if (!privateKey) {
+  let rawKey = process.env.PRIVATE_KEY;
+  if (!rawKey) {
     throw new Error("PRIVATE_KEY environment variable is required");
   }
+  
+  // Format to standard Hex structure if 0x prefix was omitted
+  const privateKey = (rawKey.startsWith("0x") ? rawKey : `0x${rawKey}`) as Hex;
 
   const network = (process.env.NETWORK || "sepolia").toLowerCase();
   const isMainnet = network === "mainnet" || network === "arbitrum";

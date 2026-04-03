@@ -1,214 +1,67 @@
-# Stylus Debugger Agent
+# The Vanguard Protocol: Arbitrum Stylus Debugger MVP
+*The Brutalist Cyber-Editorial Interface for Arbitrum WASM Execution Auditing*
 
-**ArbiLink Hackathon Submission** — AI-powered Arbitrum Stylus smart contract auditor
+![Brutalist Vanguard Hero Banner](file:///C:/Users/shivamsoni/.gemini/antigravity/brain/a7a9afa9-2b06-4580-a1d5-657dbd34822f/brutalist_vanguard_banner_1775157075970.png)
 
-An AI agent that accepts Arbitrum Stylus Rust contract source code and returns a structured
-plain-English security audit report, gas optimization recommendations, and deployment readiness
-checklist — all in one command.
+![Brutalist UI Aesthetics](https://img.shields.io/badge/UX-Brutalist_Cyber_Editorial-black?style=for-the-badge&color=030303&labelColor=FF3B00)
+![Arbitrum Stylus](https://img.shields.io/badge/Ecosystem-Arbitrum_Stylus-blue?style=for-the-badge&color=213147)
+![AI Payload](https://img.shields.io/badge/Neural-Claude_Opus_Core-orange?style=for-the-badge&color=D97757)
 
----
+This repository holds the MVP for a highly specialized, brutally direct, and aesthetically uncompromising AI Smart Contract Auditor designed natively for the **Arbitrum Stylus (Rust/WASM)** execution domain. 
 
-## What It Does
-
-Stylus is Arbitrum's newest technology (Rust/WASM smart contracts). There are zero AI-native
-debugging or auditing tools for Stylus contracts today. This agent fills that gap.
-
-**Three capabilities:**
-
-1. **Full Security Audit** — scans for vulnerabilities, access control issues, panic paths,
-   integer overflow, reentrancy, and Stylus-specific SDK anti-patterns
-2. **Error Debugger** — paste a cargo-stylus or rustc error, get a plain-English explanation
-   and concrete fix
-3. **Gas Optimizer** — Stylus/WASM-specific gas pattern analysis with before/after code examples
+The web interface radically rejects predictable "AI-slop" design tropes (generic gradients, rounded glassmorphism, boring typography). It instead utilizes heavy topological grids, structural serif/mono typographic tension (`Cormorant Garamond` + `IBM Plex Mono`), stark hover-mechanics, and aggressively constrained AI payloads to deliver professional-grade analysis without the noise.
 
 ---
 
-## Quickstart
+## ⚙️ Core Operational Subsystems
 
-### 1. Install
+The dashboard is split into strictly isolated environments, relying entirely on CSS class toggling and fluid grid/flex layouts for instantaneous transitions. 
+
+### 1. Security Audit Matrix (`/audit`)
+A vertically split execution pane. You inject pure Arbitrum Stylus Rust code into the left editor. The backend transmits the payload to a customized instance of `claude-opus`, heavily instructed to act as an elite Stylus architect. 
+- **The Result**: Instead of wordy explanations, the AI outputs raw, actionable vulnerability diagnostics regarding WASM/EVM interoperability, CEI patterns, and `sol_storage!` macro exploits. 
+
+### 2. Gas Telemetry Grid (`/gas-review`)
+A horizontally split metric-dashboard tailored for compute/storage analysis.
+- **The Function**: Because WASM execution is vastly cheaper than EVM bytecode execution (but storage limits remain strict), this model ignores generic EVM cost constraints and explicitly highlights Arbitrum Stylus data allocation vectors.
+- **The Delivery**: Responses are forcefully limited. No paragraphs. Just hyper-dense metrics automatically laid out into stark HTML calculation blocks. You drag a responsive horizontal resizer to dynamically scale your view logic.
+
+### 3. Local Execution Ledger (History)
+To preserve operational momentum, every successful request is instantly tracked permanently on device using `localStorage`. 
+- Discarding generic database overhead, the system caches snippets of the actual payload, maintaining the structural timeline vertically. 
+- You can instantly retrieve any previous audit payload by hitting **[ Load => ]**, immediately repopulating the corresponding workspace for a secondary execution.
+
+---
+
+## 📂 Internal File Architecture
+
+#### Backend Infrastructure (`/src`)
+- **`server.ts`**: The nerve center of the application. An Express.js node bridging browser payloads to an underlying LLM interface. It controls the specialized neural-prompt injections that constrain AI behavior to output exclusively in Brutalist summary logic. Provides `/audit`, `/debug`, `/gas-review`, and `.get(/health)` states.
+- **`cli.ts`**: A headless CLI utility integration for advanced users operating directly in bash environments.
+
+#### Frontend Interface (`/public`)
+- **`index.html`**: A single-page application built entirely from scratch. Contains dense vanilla `<style>` topologies implementing zero-`border-radius` brutalism, distinct responsive grid-systems, staggered `clip-path` CSS animation revelations, and zero-latency `transition: 0s` interactive elements. Includes the `switchTab` navigation mechanics, the interactive draggable viewport algorithms, and localized HTML injection loops.
+
+#### Collateral & Testing (`/examples`)
+- Includes raw `.rs` Rust payloads like `test_contract.rs` engineered specifically with severe architectural flaws (e.g., initialization hijacking, mapping underflows, lacking execution checks). Users can paste these directly into the web interface to verify system accuracy.
+
+---
+
+## 🚀 Execution & Setup
+
+If deploying this repository locally, you require absolute authority over the Node environment.
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/stylus-debugger-agent
-cd stylus-debugger-agent
+# 1. Inject Dependencies
 npm install
-```
 
-### 2. Configure
-
-```bash
+# 2. Establish Keys
+# Rename .env.example to .env and provide your API configuration constraints
 cp .env.example .env
-# Edit .env — add your AIML_API_KEY at minimum
-```
+export AIML_API_KEY="your-key"
 
-### 3. Run the demo audit
-
-```bash
-npm run demo
-```
-
-This audits the included `examples/vulnerable-erc20.rs` which has intentional bugs.
-The agent should find: missing access control on `mint()`, unchecked arithmetic,
-redundant storage reads, and a panic path on `unwrap()`.
-
----
-
-## CLI Usage
-
-```bash
-# Audit a contract file
-npm run audit -- ./path/to/your/contract.rs
-
-# Debug a cargo-stylus error
-npm run debug -- ./build-error.txt
-
-# Gas optimization review
-npm run gas -- ./path/to/your/contract.rs
-```
-
----
-
-## HTTP Server
-
-Run as a live HTTP endpoint (required for the ArbiLink bonus points):
-
-```bash
+# 3. Ignite Server Protocol
 npm run dev
-# Server starts on http://localhost:3000
 ```
 
-### Endpoints
-
-#### `POST /audit`
-Full security audit of a Stylus Rust contract.
-
-```bash
-curl -X POST http://localhost:3000/audit \
-  -H "Content-Type: application/json" \
-  -d '{
-    "contractCode": "#[storage]\npub struct MyContract { ... }",
-    "filename": "my-contract.rs",
-    "context": "This is an ERC-20 token with a minting whitelist"
-  }'
-```
-
-Response:
-```json
-{
-  "success": true,
-  "filename": "my-contract.rs",
-  "audit": "## Stylus Contract Audit Report\n...",
-  "usage": { "input_tokens": 1200, "output_tokens": 890 }
-}
-```
-
-#### `POST /debug`
-Explain a cargo-stylus or rustc compile error.
-
-```bash
-curl -X POST http://localhost:3000/debug \
-  -H "Content-Type: application/json" \
-  -d '{
-    "errorOutput": "error[E0277]: the trait bound ... is not satisfied",
-    "contractCode": "..."
-  }'
-```
-
-#### `POST /gas-review`
-Gas optimization analysis.
-
-```bash
-curl -X POST http://localhost:3000/gas-review \
-  -H "Content-Type: application/json" \
-  -d '{ "contractCode": "..." }'
-```
-
-#### `GET /health`
-Agent health and capability info.
-
----
-
-## Agent Registration (Step 2 of ArbiLink)
-
-Register your agent on the Arbitrum ERC-8004 identity registry:
-
-```bash
-# Step 1: Fund a wallet with Arbitrum Sepolia ETH
-# Faucet: https://faucet.quicknode.com/arbitrum/sepolia
-# Faucet: https://arbitrum.faucet.dev
-
-# Step 2: Set environment variables
-export PRIVATE_KEY=0x_your_wallet_private_key
-export NETWORK=sepolia
-export AGENT_ENDPOINT=https://your-deployed-url.com
-
-# Step 3: Register
-npm run register:sepolia
-```
-
-On success, the script prints your **Agent ID** and **transaction hash** — include both in
-your ArbiLink submission.
-
-Registry addresses:
-- Arbitrum One: `0x8004A169FB4a3325136EB29fA0ceB6D2e539a432`
-- Arbitrum Sepolia: `0x8004A818BFB912233c491871b3d84c89A494BD9e`
-
----
-
-## What the Audit Covers
-
-| Dimension | Examples |
-|-----------|---------|
-| Security vulnerabilities | Missing `only_owner`, reentrancy via `call`, unchecked arithmetic |
-| Gas optimizations | Redundant SLOADs, unnecessary `Vec` allocs, string ops in hot paths |
-| Stylus SDK correctness | Wrong `#[storage]` macro usage, missing `sol_interface!` bindings |
-| Rust best practices | `unwrap()` panic paths, `unsafe` blocks, dead code bloating WASM |
-| Deployment readiness | `cargo-stylus check` indicators, WASM size guidance, Sepolia checklist |
-
----
-
-## Project Structure
-
-```
-stylus-debugger-agent/
-├── SKILL.md                    # Skill definition (ArbiLink format)
-├── src/
-│   ├── server.ts               # Express HTTP server (live agent endpoint)
-│   ├── cli.ts                  # CLI for local use
-│   └── register-agent.ts       # On-chain agent registration script
-├── examples/
-│   └── vulnerable-erc20.rs     # Demo contract with intentional bugs
-├── package.json
-├── tsconfig.json
-└── .env.example
-```
-
----
-
-## Tech Stack
-
-- **Claude claude-opus-4-5** — audit reasoning and report generation
-- **stylus-sdk v0.6+** — Stylus Rust SDK knowledge base
-- **viem v2** — on-chain agent registration
-- **Express** — HTTP server for live agent endpoint
-- **agent0 / ERC-8004** — Arbitrum identity registry
-
----
-
-## Requirements
-
-- Node.js 18+
-- `AIML_API_KEY` in `.env`
-- Funded wallet for agent registration (Arbitrum Sepolia ETH)
-
----
-
-## ArbiLink Submission Checklist
-
-- [x] Skill built (Stylus contract auditor)
-- [x] SKILL.md written in ArbiLink format
-- [x] Agent registration script ready (`npm run register:sepolia`)
-- [x] Live HTTP endpoint deployable (`npm run dev`)
-- [x] Demo contract with verified findings (`npm run demo`)
-- [ ] Register agent and note your Agent ID + tx hash
-- [ ] Deploy to a public URL (Railway, Render, Fly.io)
-- [ ] Submit before April 3, 19:30 CET
+Point an Chromium/Webkit browser to **`http://localhost:3000`**. The agent relies on a live internet connection exclusively for the Neural LLM verification. All UI layouts, state retention engines, and execution grids operate purely locally on the client. 
