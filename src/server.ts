@@ -216,19 +216,19 @@ ${contractCode}
 app.get("/health", (_req, res) => {
   res.json({
     status: "ok",
-    agent: "stylus-debugger-agent",
+    agent: "StylusAudit",
     version: "1.0.0",
     endpoints: ["/audit", "/debug", "/gas-review"],
     description:
-      "AI-powered Arbitrum Stylus smart contract auditor and debugger",
+      "AI-powered security auditor for Arbitrum Stylus Rust smart contracts",
   });
 });
 
 // ── Start ─────────────────────────────────────────────────────────────────────
 
-const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Stylus Debugger Agent running on http://0.0.0.0:${PORT}`);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`StylusAudit running on port ${PORT}`);
   console.log(`  POST /audit       — Full security audit`);
   console.log(`  POST /debug       — Explain cargo-stylus errors`);
   console.log(`  POST /gas-review  — Gas optimization review`);

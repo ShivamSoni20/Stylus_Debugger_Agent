@@ -39,9 +39,12 @@ const REGISTRY_ABI = parseAbi([
 const AGENT_METADATA = {
   name: "StylusAudit",
   description:
-    "AI-powered security auditor for Arbitrum Stylus Rust smart contracts. Detects vulnerabilities, gas inefficiencies, and Stylus SDK anti-patterns. Returns structured audit reports with severity ratings and concrete code fixes. Built for ArbiLink Hackathon 2026.",
+    "AI-powered security auditor for Arbitrum Stylus Rust smart contracts. " +
+    "Detects vulnerabilities, gas inefficiencies, and Stylus SDK anti-patterns. " +
+    "Returns structured audit reports with severity ratings and concrete code fixes. " +
+    "ArbiLink Hackathon 2026.",
   endpoint: process.env.AGENT_ENDPOINT || "https://your-deployed-url.com",
-  metadataURI: process.env.AGENT_METADATA_URI || "https://your-deployed-url.com/agent-metadata.json",
+  metadataURI: (process.env.AGENT_ENDPOINT || "https://your-deployed-url.com") + "/health",
 };
 
 // ── Main registration function ────────────────────────────────────────────────

@@ -1,5 +1,7 @@
-# The Vanguard Protocol: Arbitrum Stylus Debugger MVP
-*The Brutalist Cyber-Editorial Interface for Arbitrum WASM Execution Auditing*
+# # StylusAudit — Complete Master Architecture, Integration & Deployment Guide
+
+> AI-powered security auditor for Arbitrum Stylus (Rust/WASM) smart contracts
+> ArbiLink Agentic Bounty 2026 | Deadline: April 3, 19:30 CET
 
 ![Brutalist Vanguard Hero Banner](file:///C:/Users/shivamsoni/.gemini/antigravity/brain/a7a9afa9-2b06-4580-a1d5-657dbd34822f/brutalist_vanguard_banner_1775157075970.png)
 
@@ -7,61 +9,126 @@
 ![Arbitrum Stylus](https://img.shields.io/badge/Ecosystem-Arbitrum_Stylus-blue?style=for-the-badge&color=213147)
 ![AI Payload](https://img.shields.io/badge/Neural-Claude_Opus_Core-orange?style=for-the-badge&color=D97757)
 
-This repository holds the MVP for a highly specialized, brutally direct, and aesthetically uncompromising AI Smart Contract Auditor designed natively for the **Arbitrum Stylus (Rust/WASM)** execution domain. 
+---
 
-The web interface radically rejects predictable "AI-slop" design tropes (generic gradients, rounded glassmorphism, boring typography). It instead utilizes heavy topological grids, structural serif/mono typographic tension (`Cormorant Garamond` + `IBM Plex Mono`), stark hover-mechanics, and aggressively constrained AI payloads to deliver professional-grade analysis without the noise.
+## 1. What This Project Is
+
+StylusAudit is an AI-powered agent skill that analyzes Arbitrum Stylus (Rust) smart contracts for:
+- Security vulnerabilities (reentrancy, overflow, missing access control)
+- Gas optimization opportunities (WASM-specific)
+- Stylus SDK correctness (macros, storage patterns)
+- Rust best practices (memory safety, idiomatic code)
+- Deployment readiness (mainnet checklist)
+
+**AI backbone**: OpenAI-compatible SDK pointed at `https://api.aimlapi.com/v1` using Claude 3.5 Opus  
+**UI**: "The Vanguard Protocol" — brutalist cyber-editorial single HTML file  
+**On-chain**: Registered on Arbitrum ERC-8004 identity registry via viem  
+**Deployed**: Railway (Node.js/Express)
 
 ---
 
-## ⚙️ Core Operational Subsystems
+## 2. Complete Directory Structure
 
-The dashboard is split into strictly isolated environments, relying entirely on CSS class toggling and fluid grid/flex layouts for instantaneous transitions. 
-
-### 1. Security Audit Matrix (`/audit`)
-A vertically split execution pane. You inject pure Arbitrum Stylus Rust code into the left editor. The backend transmits the payload to a customized instance of `claude-opus`, heavily instructed to act as an elite Stylus architect. 
-- **The Result**: Instead of wordy explanations, the AI outputs raw, actionable vulnerability diagnostics regarding WASM/EVM interoperability, CEI patterns, and `sol_storage!` macro exploits. 
-
-### 2. Gas Telemetry Grid (`/gas-review`)
-A horizontally split metric-dashboard tailored for compute/storage analysis.
-- **The Function**: Because WASM execution is vastly cheaper than EVM bytecode execution (but storage limits remain strict), this model ignores generic EVM cost constraints and explicitly highlights Arbitrum Stylus data allocation vectors.
-- **The Delivery**: Responses are forcefully limited. No paragraphs. Just hyper-dense metrics automatically laid out into stark HTML calculation blocks. You drag a responsive horizontal resizer to dynamically scale your view logic.
-
-### 3. Local Execution Ledger (History)
-To preserve operational momentum, every successful request is instantly tracked permanently on device using `localStorage`. 
-- Discarding generic database overhead, the system caches snippets of the actual payload, maintaining the structural timeline vertically. 
-- You can instantly retrieve any previous audit payload by hitting **[ Load => ]**, immediately repopulating the corresponding workspace for a secondary execution.
-
----
-
-## 📂 Internal File Architecture
-
-#### Backend Infrastructure (`/src`)
-- **`server.ts`**: The nerve center of the application. An Express.js node bridging browser payloads to an underlying LLM interface. It controls the specialized neural-prompt injections that constrain AI behavior to output exclusively in Brutalist summary logic. Provides `/audit`, `/debug`, `/gas-review`, and `.get(/health)` states.
-- **`cli.ts`**: A headless CLI utility integration for advanced users operating directly in bash environments.
-
-#### Frontend Interface (`/public`)
-- **`index.html`**: A single-page application built entirely from scratch. Contains dense vanilla `<style>` topologies implementing zero-`border-radius` brutalism, distinct responsive grid-systems, staggered `clip-path` CSS animation revelations, and zero-latency `transition: 0s` interactive elements. Includes the `switchTab` navigation mechanics, the interactive draggable viewport algorithms, and localized HTML injection loops.
-
-#### Collateral & Testing (`/examples`)
-- Includes raw `.rs` Rust payloads like `test_contract.rs` engineered specifically with severe architectural flaws (e.g., initialization hijacking, mapping underflows, lacking execution checks). Users can paste these directly into the web interface to verify system accuracy.
-
----
-
-## 🚀 Execution & Setup
-
-If deploying this repository locally, you require absolute authority over the Node environment.
-
-```bash
-# 1. Inject Dependencies
-npm install
-
-# 2. Establish Keys
-# Rename .env.example to .env and provide your API configuration constraints
-cp .env.example .env
-export AIML_API_KEY="your-key"
-
-# 3. Ignite Server Protocol
-npm run dev
+```
+stylus-debugger-agent/
+├── src/
+│   ├── server.ts              ← Express HTTP server (main backend — THE BRAIN)
+│   ├── cli.ts                 ← CLI tool for local terminal use
+│   └── register-agent.ts      ← Arbitrum ERC-8004 on-chain registration
+├── public/
+│   └── index.html             ← Vanguard Protocol UI (single HTML file, all-in-one)
+├── examples/
+│   └── test_contract.rs       ← Intentionally vulnerable Stylus contract for demo
+├── SKILL.md                   ← ArbiLink skill definition (required for submission)
+├── README.md                  ← Full project documentation
+├── package.json               ← Dependencies + scripts
+├── tsconfig.json              ← TypeScript config (CommonJS for Railway)
+├── .env.example               ← Env template (committed to git)
+└── .env                       ← Actual keys (NEVER commit — set in Railway dashboard)
 ```
 
-Point an Chromium/Webkit browser to **`http://localhost:3000`**. The agent relies on a live internet connection exclusively for the Neural LLM verification. All UI layouts, state retention engines, and execution grids operate purely locally on the client. 
+---
+
+## 3. Component Deep-Dive
+
+### 3.1 — `src/server.ts` (The Brain)
+
+**What it does:**
+Express HTTP server. Receives Rust contract code from the frontend, reads `SKILL.md` as AI system context, calls the AI/ML API (Claude Opus), and returns structured audit results.
+
+**All 4 endpoints:**
+
+| Method | Route       | Request Body                              | Response                              |
+|--------|-------------|-------------------------------------------|---------------------------------------|
+| POST   | /audit      | `{ contractCode, filename? }`             | `{ success, audit, usage }`           |
+| POST   | /debug      | `{ errorOutput, contractCode? }`          | `{ success, explanation, usage }`     |
+| POST   | /gas-review | `{ contractCode }`                        | `{ success, gasReview, usage }`       |
+| GET    | /health     | none                                      | `{ status:"ok", agent, version }`     |
+
+---
+
+### 3.2 — `public/index.html` (The Vanguard Protocol UI)
+
+**What it is:**  
+Single self-contained HTML file. No framework, no build step. Brutalist design — Cormorant Garamond + IBM Plex Mono. Contains landing page + full dashboard with 3 analysis tabs + localStorage history ledger.
+
+**The one line to set (bottom of index.html):**
+```javascript
+window.API_BASE = 'https://your-railway-url.up.railway.app';
+```
+
+---
+
+### 3.3 — `package.json` (Scripts — Railway uses `npm start`)
+
+```json
+{
+  "name": "stylus-debugger-agent",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "scripts": {
+    "dev":              "tsx watch src/server.ts",
+    "build":            "tsc",
+    "start":            "tsx src/server.ts",
+    "register:sepolia": "NETWORK=sepolia tsx src/register-agent.ts",
+    "demo":             "tsx src/cli.ts audit examples/test_contract.rs"
+  }
+}
+```
+
+---
+
+### 3.4 — Railway Deployment
+
+1. **Deploy from GitHub**
+2. **Set Environment Variables**: `AIML_API_KEY`, `PORT`, `NETWORK`, `AGENT_ENDPOINT`.
+3. **Set Start Command**: `npm run dev`
+4. **Get Your Live URL** and update `AGENT_ENDPOINT` and `window.API_BASE`.
+
+---
+
+## 4. Full Request Flow — End to End
+
+1. User pastes Rust code into Vanguard Protocol editor.
+2. Clicks "Run Security Audit".
+3. `server.ts` calls AI/ML API with `SKILL.md` context.
+4. UI renders the structured markdown audit.
+5. System logs the scan to Local Execution Ledger.
+
+---
+
+## 5. ArbiLink Submission Checklist
+
+- [ ] `public/index.html` exists in repo
+- [ ] CORS headers added to `server.ts`
+- [ ] `tsx` is in dependencies
+- [ ] `npm run dev` as Railway start command
+- [ ] `/health` returns `{ status: "ok" }`
+- [ ] Agent registered on Arbitrum Sepolia
+- [ ] Submission form filled
+
+---
+
+## 6. Why StylusAudit Wins
+
+First AI auditor for Stylus — zero competition in developer tooling. Truly native to the Arbitrum stack. 
