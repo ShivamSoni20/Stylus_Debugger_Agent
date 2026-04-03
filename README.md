@@ -119,13 +119,17 @@ window.API_BASE = 'https://your-railway-url.up.railway.app';
 
 ## 5. ArbiLink Submission Checklist
 
-- [ ] `public/index.html` exists in repo
-- [ ] CORS headers added to `server.ts`
-- [ ] `tsx` is in dependencies
-- [ ] `npm run dev` as Railway start command
-- [ ] `/health` returns `{ status: "ok" }`
-- [ ] Agent registered on Arbitrum Sepolia
-- [ ] Submission form filled
+- [x] `public/index.html` exists in repo
+- [x] CORS headers added to `server.ts`
+- [x] `tsx` is in dependencies
+- [x] `npm run dev` as Railway start command
+- [x] `/health` returns `{ status: "ok" }`
+- [x] Agent registered on Arbitrum Sepolia
+- [x] Submission form filled
+
+### Submission Details
+- **Transaction Hash:** `0x00af454281eee83d45c58195d0ffe01473657e17e36957b17d5fb9c73b765441`
+- **Agent Endpoint:** `https://stylus-debugger-agent-production.up.railway.app`
 
 ---
 

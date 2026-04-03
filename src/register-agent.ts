@@ -37,7 +37,7 @@ const REGISTRY_ABI = parseAbi([
 
 // ── Agent metadata ─────────────────────────────────────────────────────────────
 const AGENT_METADATA = {
-  name: "StylusAudit",
+  name: "WASMGuard",
   description:
     "AI-powered security auditor for Arbitrum Stylus Rust smart contracts. " +
     "Detects vulnerabilities, gas inefficiencies, and Stylus SDK anti-patterns. " +
@@ -118,6 +118,7 @@ async function registerAgent() {
         AGENT_METADATA.endpoint,
         AGENT_METADATA.metadataURI,
       ],
+      gas: 2000000n,
     });
 
     console.log(`\n📡 Transaction sent: ${txHash}`);

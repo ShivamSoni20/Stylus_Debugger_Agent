@@ -8,7 +8,7 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "tsx src/server.ts",
-    "register:sepolia": "NETWORK=sepolia tsx src/register-agent.ts",
+    "register:sepolia": "tsx src/register-agent.ts",
     "demo": "tsx src/cli.ts audit examples/test_contract.rs"
   },
   "author": "ArbiLink Hackathon Submission",
