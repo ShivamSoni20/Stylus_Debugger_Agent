@@ -215,9 +215,9 @@ app.get("/health", (_req, res) => {
 
 // ── Start ─────────────────────────────────────────────────────────────────────
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Stylus Debugger Agent running on http://localhost:${PORT}`);
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Stylus Debugger Agent running on port ${PORT}`);
   console.log(`  POST /audit       — Full security audit`);
   console.log(`  POST /debug       — Explain cargo-stylus errors`);
   console.log(`  POST /gas-review  — Gas optimization review`);
