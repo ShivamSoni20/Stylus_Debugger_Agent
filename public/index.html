@@ -392,8 +392,6 @@
 </div>
 
 <script>
-  window.API_BASE = 'https://stylusdebuggeragent-production.up.railway.app';
-  
   function showPage(id) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById('page-' + id).classList.add('active');
@@ -545,7 +543,7 @@
     statusLabel.style.color = 'var(--text)';
 
     try {
-      const res = await fetch(`${window.API_BASE}/audit`, {
+      const res = await fetch('/audit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ contractCode: code }),
@@ -584,7 +582,7 @@
     resultPanel.innerHTML = '<div style="color:var(--text-dim); padding:1rem; grid-column:span 2;text-align:center;">[SYS] MEASURING ALLOCATIONS...</div>';
     
     try {
-      const res = await fetch(`${window.API_BASE}/gas-review`, {
+      const res = await fetch('/gas-review', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ contractCode: code }),
